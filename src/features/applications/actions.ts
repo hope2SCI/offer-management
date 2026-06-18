@@ -34,13 +34,6 @@ function applicationInputFromForm(formData: FormData) {
   };
 }
 
-export async function createApplicationAction(formData: FormData) {
-  const user = await requireUser();
-  await createApplication(user.id, applicationInputFromForm(formData));
-  revalidatePath("/applications");
-  redirect("/applications");
-}
-
 export async function createApplicationInPlaceAction(
   _state: CreateApplicationFormState,
   formData: FormData
@@ -54,14 +47,6 @@ export async function createApplicationInPlaceAction(
   } catch (error) {
     return { ok: false, message: getErrorMessage(error) };
   }
-}
-
-export async function updateApplicationAction(id: string, formData: FormData) {
-  const user = await requireUser();
-  await updateApplication(user.id, id, applicationInputFromForm(formData));
-  revalidatePath("/applications");
-  revalidatePath(`/applications/${id}`);
-  redirect(`/applications/${id}`);
 }
 
 export async function updateApplicationInModalAction(
@@ -90,7 +75,6 @@ export async function updateApplicationStatusAction(
     (formData.get("endReason") || undefined) as EndReason | undefined
   );
   revalidatePath("/applications");
-  revalidatePath(`/applications/${id}`);
 }
 
 export async function deleteApplicationAction(id: string) {

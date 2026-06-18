@@ -63,8 +63,6 @@ export const APPLICATION_SOURCES = [
   "其他"
 ] as const;
 
-export type ApplicationSource = (typeof APPLICATION_SOURCES)[number];
-
 export const ACTIVITY_TYPES = {
   STATUS_CHANGED: "STATUS_CHANGED",
   NOTE_ADDED: "NOTE_ADDED",
@@ -72,15 +70,3 @@ export const ACTIVITY_TYPES = {
   TASK_CREATED: "TASK_CREATED",
   CUSTOM: "CUSTOM"
 } as const;
-
-export function isApplicationStatus(value: string): value is ApplicationStatus {
-  return APPLICATION_STATUSES.includes(value as ApplicationStatus);
-}
-
-export function isEndReason(value: string): value is EndReason {
-  return END_REASONS.includes(value as EndReason);
-}
-
-export function isPriority(value: string): value is Priority {
-  return PRIORITIES.includes(value as Priority);
-}

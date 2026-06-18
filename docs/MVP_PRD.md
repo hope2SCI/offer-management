@@ -208,20 +208,22 @@ Offer
 
 - 查看岗位列表。
 - 按状态分列。
-- 点击卡片进入详情页。
+- 点击卡片打开岗位详情弹窗。
+- 在看板顶部或任一状态列中打开新增岗位弹窗。
+- 在详情弹窗内编辑并保存岗位信息。
 - 更新岗位状态。
 - 支持基础筛选和搜索。
 
-### 8.5 `/applications/new`
+### 8.5 岗位新增与详情弹窗
 
-新增岗位页。
+岗位新增和详情编辑均在 `/applications` 页面内以弹窗形式完成，不再提供独立新增页或详情页。
 
-必填字段：
+新增岗位必填字段：
 
 - 公司名。
 - 岗位名。
 
-可选字段：
+新增与编辑可选字段：
 
 - 城市。
 - 薪资范围。
@@ -233,11 +235,7 @@ Offer
 - 关联简历。
 - 备注。
 
-### 8.6 `/applications/[id]`
-
-岗位详情页。
-
-核心内容：
+详情弹窗核心内容：
 
 - 基础信息。
 - 当前状态。
@@ -250,7 +248,7 @@ Offer
 - 活动时间线。
 - 面试复盘入口。
 
-### 8.7 `/resumes`
+### 8.6 `/resumes`
 
 简历仓页面。
 
@@ -271,7 +269,7 @@ Offer
 - 第一版不做简历在线编辑。
 - 第一版不做简历版本树。
 
-### 8.8 `/tasks`
+### 8.7 `/tasks`
 
 日程待办页。
 
@@ -300,7 +298,7 @@ Follow-up
 - 删除待办。
 - 关联岗位。
 
-### 8.9 `/interviews`
+### 8.8 `/interviews`
 
 面试复盘入口页。
 
@@ -767,36 +765,28 @@ Next.js App Router 的 API 接口统一放在：
 src/app/api/**/route.ts
 ```
 
-示例：
+当前第一版仅保留确实需要文件流响应的接口：
 
 ```text
-src/app/api/auth/login/route.ts
-src/app/api/auth/logout/route.ts
-src/app/api/resumes/upload/route.ts
 src/app/api/resumes/[id]/file/route.ts
-src/app/api/applications/[id]/status/route.ts
-src/app/api/ai/resume-advice/route.ts
 ```
 
 对应接口：
 
 ```text
-POST /api/auth/login
-POST /api/auth/logout
-POST /api/resumes/upload
 GET  /api/resumes/:id/file
-PATCH /api/applications/:id/status
-POST /api/ai/resume-advice
 ```
 
 Route Handler 职责：
 
 - 解析请求参数。
 - 校验登录态。
-- 调用对应 feature 的 service。
-- 返回 JSON、文件流或错误响应。
+- 调用对应 feature 的 service 或查询。
+- 返回文件流或错误响应。
 
 Route Handler 不应承载大量业务逻辑。
+
+普通表单提交、登录登出、新增岗位、更新岗位、上传简历、待办操作优先使用 Server Actions，不额外保留未被页面调用的 JSON API。
 
 ### 11.5 Server Actions 与 Route Handlers 分工
 
@@ -810,22 +800,21 @@ Route Handler 不应承载大量业务逻辑。
 - 更新岗位状态。
 - 新增待办。
 - 完成待办。
+- 登录和登出。
+- PDF 上传。
 - 修改简历名称、标签和备注。
 
 适合使用 Route Handlers 的操作：
 
-- 登录。
-- 登出。
-- PDF 上传。
 - PDF 文件预览或下载。
-- 后续 AI 调用。
+- 后续真正接入 AI 服务时的流式或外部请求。
 - 未来给外部工具或浏览器插件调用的接口。
 
 原则：
 
 ```text
 页面内部表单提交和状态更新，优先 Server Actions。
-文件、鉴权、AI、外部调用，使用 /api Route Handlers。
+文件流、AI 外部服务、外部调用，使用 /api Route Handlers。
 ```
 
 ### 11.6 文件访问策略

@@ -6,8 +6,7 @@ import {
   completeTask,
   createTask,
   deleteTask,
-  reopenTask,
-  updateTask
+  reopenTask
 } from "./service";
 
 function taskInputFromForm(formData: FormData) {
@@ -23,14 +22,6 @@ function taskInputFromForm(formData: FormData) {
 export async function createTaskAction(formData: FormData) {
   const user = await requireUser();
   await createTask(user.id, taskInputFromForm(formData));
-  revalidatePath("/tasks");
-  revalidatePath("/dashboard");
-  revalidatePath("/applications");
-}
-
-export async function updateTaskAction(id: string, formData: FormData) {
-  const user = await requireUser();
-  await updateTask(user.id, id, taskInputFromForm(formData));
   revalidatePath("/tasks");
   revalidatePath("/dashboard");
   revalidatePath("/applications");
