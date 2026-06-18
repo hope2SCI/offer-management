@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String           @id @default(cuid())
+  username     String           @unique
+  passwordHash String
+  applications JobApplication[]
+  resumes      Resume[]
+  tasks        Task[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model JobApplication {
+  id                  String                @id @default(cuid())
+  userId              String
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName         String
+  jobTitle            String
+  status              String                @default("INTERESTED")
+  endReason           String?
+  priority            String                @default("MEDIUM")
+  city                String?
+  salaryRange         String?
+  jobUrl              String?
+  jdContent           String?
+  source              String?
+  notes               String?
+  resumeId            String?
+  resume              Resume?               @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  tasks               Task[]
+  activities          ApplicationActivity[]
+  interviewReviews    InterviewReview[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  lastStatusChangedAt DateTime              @default(now())
+
+  @@index([userId])
+}
+
+model Resume {
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  fileName     String
+  filePath     String
+  fileSize     Int
+  tags         String?
+  notes        String?
+  applications JobApplication[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([userId])
+}
+
+model Task {
+  id               String          @id @default(cuid())
+  userId           String
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title            String
+  description      String?
+  type             String          @default("CUSTOM")
+  dueAt            DateTime
+  completedAt      DateTime?
+  jobApplicationId String?
+  jobApplication   JobApplication? @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([userId])
+}
+
+model ApplicationActivity {
+  id               String             @id @default(cuid())
+  jobApplicationId String
+  jobApplication   JobApplication     @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+  type             String
+  fromStatus       String?
+  toStatus         String?
+  content          String?
+  createdAt        DateTime           @default(now())
+}
+
+model InterviewReview {
+  id               String         @id @default(cuid())
+  jobApplicationId String
+  jobApplication   JobApplication @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+  round            String?
+  scheduledAt      DateTime?
+  notes            String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
