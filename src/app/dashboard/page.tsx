@@ -35,6 +35,7 @@ export default async function DashboardPage() {
 
   return (
     <AppShell
+      username={user.username}
       title="Dashboard"
       description="查看当前求职状态、待办压力和最近更新。"
       action={

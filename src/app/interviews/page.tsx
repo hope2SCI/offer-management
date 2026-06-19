@@ -3,10 +3,11 @@ import { AppShell } from "@/components/layout/app-shell";
 import { requireUser } from "@/features/auth/session";
 
 export default async function InterviewsPage() {
-  await requireUser();
+  const user = await requireUser();
 
   return (
     <AppShell
+      username={user.username}
       title="面试复盘"
       description="第一版先保留入口，后续扩展结构化复盘与 AI 建议。"
     >

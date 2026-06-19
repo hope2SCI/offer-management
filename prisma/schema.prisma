@@ -50,6 +50,9 @@ model Resume {
   userId       String
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   name         String
+  version      String           @default("v1.0")
+  targetRole   String?
+  language     String           @default("中文")
   fileName     String
   filePath     String
   fileSize     Int

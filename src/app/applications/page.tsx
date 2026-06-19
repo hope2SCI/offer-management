@@ -53,6 +53,7 @@ export default async function ApplicationsPage({
 
   return (
     <AppShell
+      username={user.username}
       title="投递看板"
       description="按固定流程管理所有岗位机会。"
       action={

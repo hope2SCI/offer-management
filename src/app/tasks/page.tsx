@@ -16,6 +16,7 @@ export default async function TasksPage() {
 
   return (
     <AppShell
+      username={user.username}
       title="日程待办"
       description="管理今日待办、逾期待办和本周日程。"
     >

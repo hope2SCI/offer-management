@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { logoutAction } from "@/features/auth/actions";
+import { AccountMenu } from "./account-menu";
 import { Sidebar } from "./sidebar";
 
 type AppShellProps = {
@@ -7,9 +7,16 @@ type AppShellProps = {
   description?: string;
   children: ReactNode;
   action?: ReactNode;
+  username: string;
 };
 
-export function AppShell({ title, description, children, action }: AppShellProps) {
+export function AppShell({
+  title,
+  description,
+  children,
+  action,
+  username
+}: AppShellProps) {
   return (
     <div className="min-h-screen bg-slate-50">
       <Sidebar />
@@ -24,11 +31,7 @@ export function AppShell({ title, description, children, action }: AppShellProps
             </div>
             <div className="flex items-center gap-3">
               {action}
-              <form action={logoutAction}>
-                <button className="h-9 rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 hover:bg-slate-100">
-                  登出
-                </button>
-              </form>
+              <AccountMenu username={username} />
             </div>
           </div>
         </header>
