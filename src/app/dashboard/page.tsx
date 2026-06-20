@@ -27,10 +27,7 @@ export default async function DashboardPage() {
     { label: "Offer", value: metrics.cards.offerCount },
     { label: "已结束", value: metrics.cards.endedCount },
     { label: "高优先级", value: metrics.cards.highPriorityCount },
-    {
-      label: "投递到面试转化率",
-      value: `${metrics.cards.interviewConversionRate}%`
-    }
+    { label: "本周投递数", value: metrics.cards.weeklyAppliedCount }
   ];
 
   return (

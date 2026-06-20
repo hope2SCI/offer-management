@@ -75,6 +75,7 @@ export async function updateApplicationStatusAction(
     (formData.get("endReason") || undefined) as EndReason | undefined
   );
   revalidatePath("/applications");
+  revalidatePath("/dashboard");
 }
 
 export async function deleteApplicationAction(id: string) {

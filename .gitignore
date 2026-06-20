@@ -10,3 +10,4 @@ uploads/resumes/*
 !uploads/resumes/.gitkeep
 tsconfig.tsbuildinfo
 tests/
+AGENTS.md

@@ -10,11 +10,18 @@ export function endOfToday() {
   return date;
 }
 
-export function endOfWeek() {
-  const date = endOfToday();
-  const day = date.getDay();
-  const daysUntilSunday = 6 - day;
-  date.setDate(date.getDate() + daysUntilSunday);
+export function startOfWeek(reference = new Date()) {
+  const date = new Date(reference);
+  const daysSinceMonday = (date.getDay() + 6) % 7;
+  date.setDate(date.getDate() - daysSinceMonday);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+export function endOfWeek(reference = new Date()) {
+  const date = startOfWeek(reference);
+  date.setDate(date.getDate() + 6);
+  date.setHours(23, 59, 59, 999);
   return date;
 }
 

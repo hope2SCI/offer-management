@@ -1,35 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import { getTaskBuckets } from "@/features/tasks/queries";
+import { endOfWeek, startOfWeek } from "@/lib/date";
 import {
   APPLICATION_STATUSES,
   STATUS_LABELS,
   type ApplicationStatus
 } from "@/features/applications/constants";
 
-const appliedAndAfter = [
-  "APPLIED",
-  "WRITTEN_TEST",
-  "FIRST_INTERVIEW",
-  "SECOND_INTERVIEW",
-  "HR_INTERVIEW",
-  "OFFER",
-  "ENDED"
-];
-
-const interviewAndAfter = [
-  "FIRST_INTERVIEW",
-  "SECOND_INTERVIEW",
-  "HR_INTERVIEW",
-  "OFFER"
-];
-
 export async function getDashboardMetrics(userId: string) {
+  const weekStart = startOfWeek();
+  const weekEnd = endOfWeek();
   const [
     totalApplications,
     activeApplications,
     offerCount,
     endedCount,
     highPriorityCount,
+    weeklyAppliedCount,
     allApplications,
     recentApplications,
     taskBuckets
@@ -43,6 +30,12 @@ export async function getDashboardMetrics(userId: string) {
     prisma.jobApplication.count({
       where: { userId, priority: "HIGH", status: { not: "ENDED" } }
     }),
+    prisma.jobApplication.count({
+      where: {
+        userId,
+        createdAt: { gte: weekStart, lte: weekEnd }
+      }
+    }),
     prisma.jobApplication.findMany({
       where: { userId },
       select: { status: true }
@@ -55,13 +48,6 @@ export async function getDashboardMetrics(userId: string) {
     }),
     getTaskBuckets(userId)
   ]);
-
-  const denominator = allApplications.filter((application) =>
-    appliedAndAfter.includes(application.status)
-  ).length;
-  const numerator = allApplications.filter((application) =>
-    interviewAndAfter.includes(application.status)
-  ).length;
 
   const statusDistribution = APPLICATION_STATUSES.map((status) => ({
     status,
@@ -77,8 +63,7 @@ export async function getDashboardMetrics(userId: string) {
       offerCount,
       endedCount,
       highPriorityCount,
-      interviewConversionRate:
-        denominator === 0 ? 0 : Math.round((numerator / denominator) * 100)
+      weeklyAppliedCount
     },
     statusDistribution,
     recentApplications,
