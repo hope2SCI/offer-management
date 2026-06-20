@@ -360,7 +360,7 @@ export function ApplicationDetailModal({
                 </select>
                 <input
                   name="dueAt"
-                  type="datetime-local"
+                  type="date"
                   required
                   className="h-9 w-full rounded-md border border-slate-300 px-3 focus-ring"
                 />

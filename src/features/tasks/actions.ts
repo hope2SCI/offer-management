@@ -6,8 +6,11 @@ import {
   completeTask,
   createTask,
   deleteTask,
-  reopenTask
+  reopenTask,
+  updateTask
 } from "./service";
+
+export type TaskFormState = { ok: boolean };
 
 function taskInputFromForm(formData: FormData) {
   return {
@@ -25,6 +28,31 @@ export async function createTaskAction(formData: FormData) {
   revalidatePath("/tasks");
   revalidatePath("/dashboard");
   revalidatePath("/applications");
+}
+
+export async function createTaskInModalAction(
+  _state: TaskFormState,
+  formData: FormData
+): Promise<TaskFormState> {
+  await createTaskAction(formData);
+  return { ok: true };
+}
+
+export async function updateTaskAction(id: string, formData: FormData) {
+  const user = await requireUser();
+  await updateTask(user.id, id, taskInputFromForm(formData));
+  revalidatePath("/tasks");
+  revalidatePath("/dashboard");
+  revalidatePath("/applications");
+}
+
+export async function updateTaskInModalAction(
+  id: string,
+  _state: TaskFormState,
+  formData: FormData
+): Promise<TaskFormState> {
+  await updateTaskAction(id, formData);
+  return { ok: true };
 }
 
 export async function completeTaskAction(id: string) {

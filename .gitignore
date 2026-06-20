@@ -9,3 +9,4 @@ prisma/dev.db-journal
 uploads/resumes/*
 !uploads/resumes/.gitkeep
 tsconfig.tsbuildinfo
+tests/

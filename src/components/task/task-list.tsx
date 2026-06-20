@@ -1,5 +1,6 @@
 import type { JobApplication, Task } from "@prisma/client";
-import { formatDateTime } from "@/lib/date";
+import { TaskEditModalButton } from "@/components/task/task-edit-modal-button";
+import { formatDate } from "@/lib/date";
 import { TASK_TYPE_LABELS, type TaskType } from "@/features/tasks/constants";
 import {
   completeTaskAction,
@@ -10,10 +11,15 @@ import { Badge } from "@/components/ui/badge";
 
 type TaskListProps = {
   tasks: Array<Task & { jobApplication?: JobApplication | null }>;
+  applications?: Array<{ id: string; companyName: string; jobTitle: string }>;
   emptyText?: string;
 };
 
-export function TaskList({ tasks, emptyText = "暂无待办" }: TaskListProps) {
+export function TaskList({
+  applications,
+  tasks,
+  emptyText = "暂无待办"
+}: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
@@ -37,7 +43,20 @@ export function TaskList({ tasks, emptyText = "暂无待办" }: TaskListProps) {
             <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-medium text-slate-950">{task.title}</h3>
+                  {applications ? (
+                    <TaskEditModalButton
+                      applications={applications}
+                      task={task}
+                    >
+                      <span className="font-medium text-slate-950">
+                        {task.title}
+                      </span>
+                    </TaskEditModalButton>
+                  ) : (
+                    <h3 className="font-medium text-slate-950">
+                      {task.title}
+                    </h3>
+                  )}
                   <Badge className="border-teal-200 bg-teal-50 text-teal-700">
                     {TASK_TYPE_LABELS[type]}
                   </Badge>
@@ -48,7 +67,7 @@ export function TaskList({ tasks, emptyText = "暂无待办" }: TaskListProps) {
                   ) : null}
                 </div>
                 <p className="mt-2 text-sm text-slate-500">
-                  时间：{formatDateTime(task.dueAt)}
+                  时间：{formatDate(task.dueAt)}
                 </p>
                 {task.jobApplication ? (
                   <p className="mt-1 text-sm text-slate-500">
