@@ -97,9 +97,16 @@ model InterviewReview {
   id               String         @id @default(cuid())
   jobApplicationId String
   jobApplication   JobApplication @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
-  round            String?
-  scheduledAt      DateTime?
+  round            String
+  scheduledAt      DateTime
+  durationMinutes  Int
+  overallRating    Int
+  difficulty       String
+  feeling          String
+  questions        String?
   notes            String?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
+
+  @@index([jobApplicationId])
 }

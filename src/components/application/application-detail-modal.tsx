@@ -7,6 +7,8 @@ import type {
   Task
 } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
+import { InterviewReviewList } from "@/components/interview/interview-review-list";
+import { InterviewReviewModalButton } from "@/components/interview/interview-review-modal-button";
 import { TaskList } from "@/components/task/task-list";
 import {
   deleteApplicationAction,
@@ -49,6 +51,11 @@ export function ApplicationDetailModal({
   closeHref
 }: ApplicationDetailModalProps) {
   const editFormId = `application-edit-${application.id}`;
+  const applicationOption = {
+    id: application.id,
+    companyName: application.companyName,
+    jobTitle: application.jobTitle
+  };
 
   return (
     <div
@@ -377,16 +384,24 @@ export function ApplicationDetailModal({
             </details>
 
             <section className="rounded-lg border border-slate-200 bg-white p-3">
-              <h3 className="font-semibold text-slate-950">面试复盘</h3>
-              <p className="mt-2 text-sm text-slate-500">
-                第一版保留入口，后续支持面试记录、问题复盘和 AI 建议。
-              </p>
-              <Link
-                href="/interviews"
-                className="mt-4 inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm font-medium hover:bg-slate-100"
-              >
-                查看入口
-              </Link>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-semibold text-slate-950">面试复盘</h3>
+                <InterviewReviewModalButton
+                  applications={[applicationOption]}
+                  defaultApplicationId={application.id}
+                  variant="link"
+                />
+              </div>
+              <div className="mt-3">
+                <InterviewReviewList
+                  applications={[applicationOption]}
+                  reviews={application.interviewReviews.map((review) => ({
+                    ...review,
+                    jobApplication: applicationOption
+                  }))}
+                  emptyText="这个岗位还没有面试复盘"
+                />
+              </div>
             </section>
           </aside>
         </div>

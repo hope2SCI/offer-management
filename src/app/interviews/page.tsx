@@ -1,37 +1,86 @@
-import { Sparkles } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { InterviewReviewList } from "@/components/interview/interview-review-list";
+import { InterviewReviewModalButton } from "@/components/interview/interview-review-modal-button";
 import { requireUser } from "@/features/auth/session";
+import { listApplicationOptions } from "@/features/applications/queries";
+import {
+  INTERVIEW_DIFFICULTIES,
+  INTERVIEW_DIFFICULTY_LABELS,
+  INTERVIEW_ROUNDS,
+  INTERVIEW_ROUND_LABELS
+} from "@/features/interviews/constants";
+import { listInterviewReviews } from "@/features/interviews/queries";
 
-export default async function InterviewsPage() {
+type InterviewsPageProps = {
+  searchParams: Promise<{
+    q?: string;
+    round?: string;
+    difficulty?: string;
+  }>;
+};
+
+export default async function InterviewsPage({
+  searchParams
+}: InterviewsPageProps) {
   const user = await requireUser();
+  const { q, round, difficulty } = await searchParams;
+  const [applications, reviews] = await Promise.all([
+    listApplicationOptions(user.id),
+    listInterviewReviews(user.id, q, round, difficulty)
+  ]);
 
   return (
     <AppShell
       username={user.username}
       title="面试复盘"
-      description="第一版先保留入口，后续扩展结构化复盘与 AI 建议。"
+      description="记录每次面试遇到的问题、整体评价和个人总结。"
+      action={<InterviewReviewModalButton applications={applications} />}
     >
-      <section className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
-          <Sparkles className="h-6 w-6" />
-        </div>
-        <h2 className="mt-5 text-xl font-semibold text-slate-950">
-          面试复盘即将支持
-        </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-          后续版本会支持记录面试轮次、面试问题、回答表现、改进事项，并结合岗位 JD 与简历生成 AI 复盘建议。
-        </p>
-        <div className="mt-6 grid gap-3 md:grid-cols-3">
-          {["面试记录", "问题复盘", "AI 建议"].map((item) => (
-            <div
-              key={item}
-              className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700"
-            >
-              {item}
-            </div>
+      <form className="mb-5 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:flex-row">
+        <input
+          name="q"
+          defaultValue={q ?? ""}
+          placeholder="搜索公司、岗位、问题或备注"
+          className="h-10 flex-1 rounded-md border border-slate-300 px-3 focus-ring"
+        />
+        <select
+          name="round"
+          defaultValue={round ?? ""}
+          className="h-10 rounded-md border border-slate-300 px-3 focus-ring"
+        >
+          <option value="">全部轮次</option>
+          {INTERVIEW_ROUNDS.map((item) => (
+            <option key={item} value={item}>
+              {INTERVIEW_ROUND_LABELS[item]}
+            </option>
           ))}
-        </div>
+        </select>
+        <select
+          name="difficulty"
+          defaultValue={difficulty ?? ""}
+          className="h-10 rounded-md border border-slate-300 px-3 focus-ring"
+        >
+          <option value="">全部难度</option>
+          {INTERVIEW_DIFFICULTIES.map((item) => (
+            <option key={item} value={item}>
+              {INTERVIEW_DIFFICULTY_LABELS[item]}
+            </option>
+          ))}
+        </select>
+        <button className="h-10 rounded-md border border-slate-300 px-4 text-sm font-medium hover:bg-slate-100">
+          筛选
+        </button>
+      </form>
+
+      <section className="mb-5 rounded-lg border border-teal-100 bg-teal-50 p-4 text-sm text-teal-800">
+        积累复盘后，可用于 AI 总结高频问题和建议回答。
       </section>
+
+      <InterviewReviewList
+        applications={applications}
+        reviews={reviews}
+        emptyText="还没有面试复盘，记录第一次面试吧。"
+      />
     </AppShell>
   );
 }
