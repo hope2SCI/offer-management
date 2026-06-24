@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { logoutAction } from "@/features/auth/actions";
 import { getAvatarInitial } from "./account-menu-utils";
 
@@ -22,6 +23,14 @@ export function AccountMenu({ username }: AccountMenuProps) {
           <p className="mt-1 truncate text-sm font-semibold text-slate-950">
             {username}
           </p>
+        </div>
+        <div className="border-t border-slate-200 p-1">
+          <Link
+            href="/settings"
+            className="focus-ring flex h-10 w-full items-center rounded-md px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
+          >
+            设置
+          </Link>
         </div>
         <form action={logoutAction} className="border-t border-slate-200 p-1">
           <button
