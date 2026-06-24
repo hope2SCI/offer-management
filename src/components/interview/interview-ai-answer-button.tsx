@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useState, type MouseEvent } from "react";
+import {
+  useActionState,
+  useEffect,
+  useState,
+  type MouseEvent,
+  type ReactNode
+} from "react";
 import { createPortal } from "react-dom";
 import type { InterviewReview } from "@prisma/client";
 import {
@@ -17,6 +23,13 @@ import {
 type Props = {
   review: InterviewReview;
 };
+
+type MarkdownBlock =
+  | { type: "heading"; level: 1 | 2 | 3; text: string }
+  | { type: "paragraph"; text: string }
+  | { type: "ul"; items: string[] }
+  | { type: "ol"; items: string[] }
+  | { type: "code"; text: string };
 
 export function InterviewAiAnswerButton({ review }: Props) {
   const [open, setOpen] = useState(false);
@@ -59,6 +72,7 @@ function InterviewAiAnswerModal({
   const initialMode = (review.aiAnswerMode as AiAnswerMode | null) ?? "FAST";
   const [mode, setMode] = useState<AiAnswerMode>(initialMode);
   const [answer, setAnswer] = useState(review.aiAnswer ?? "");
+  const [isEditing, setIsEditing] = useState(!review.aiAnswer);
   const [generateState, generateAction] = useActionState<
     InterviewAiAnswerState,
     FormData
@@ -69,8 +83,15 @@ function InterviewAiAnswerModal({
   >(saveInterviewAiAnswerAction.bind(null, review.id), { ok: false });
 
   useEffect(() => {
-    if (generateState.answer) setAnswer(generateState.answer);
+    if (generateState.answer) {
+      setAnswer(generateState.answer);
+      setIsEditing(false);
+    }
   }, [generateState.answer]);
+
+  useEffect(() => {
+    if (saveState.ok) setIsEditing(false);
+  }, [saveState.ok]);
 
   const message = saveState.message ?? generateState.message;
   const hasQuestions = Boolean(review.questions?.trim());
@@ -145,19 +166,35 @@ function InterviewAiAnswerModal({
 
           <form action={saveAction} className="mt-4 space-y-3">
             <input type="hidden" name="mode" value={mode} />
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">
-                AI 参考答案
-              </span>
-              <textarea
-                name="answer"
-                value={answer}
-                onChange={(event) => setAnswer(event.target.value)}
-                rows={12}
-                className="mt-1 min-h-72 w-full resize-y rounded-md border border-slate-300 px-3 py-2 text-sm leading-6 focus-ring"
-                placeholder="生成后可在这里手动修改。"
-              />
-            </label>
+            <input type="hidden" name="answer" value={answer} />
+            <div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-slate-700">
+                  AI 参考答案
+                </span>
+                {answer ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing((value) => !value)}
+                    className="text-sm font-semibold text-teal-700 hover:text-teal-900"
+                  >
+                    {isEditing ? "预览" : "编辑"}
+                  </button>
+                ) : null}
+              </div>
+
+              {isEditing ? (
+                <textarea
+                  value={answer}
+                  onChange={(event) => setAnswer(event.target.value)}
+                  rows={12}
+                  className="mt-1 min-h-72 w-full resize-y rounded-md border border-slate-300 px-3 py-2 text-sm leading-6 focus-ring"
+                  placeholder="生成后可在这里手动修改，支持 Markdown。"
+                />
+              ) : (
+                <MarkdownAnswer value={answer} />
+              )}
+            </div>
 
             {message ? (
               <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
@@ -173,13 +210,210 @@ function InterviewAiAnswerModal({
               >
                 关闭
               </button>
-              <button className="h-10 rounded-md bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-800">
-                保存
-              </button>
+              {isEditing ? (
+                <button className="h-10 rounded-md bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-800">
+                  保存
+                </button>
+              ) : null}
             </div>
           </form>
         </div>
       </section>
     </div>
   );
+}
+
+function MarkdownAnswer({ value }: { value: string }) {
+  const blocks = parseMarkdown(value);
+
+  if (blocks.length === 0) {
+    return (
+      <div className="mt-1 rounded-md border border-dashed border-slate-300 px-3 py-8 text-center text-sm text-slate-500">
+        还没有 AI 参考答案。
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-1 min-h-72 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm leading-7 text-slate-700">
+      {blocks.map((block, index) => {
+        if (block.type === "heading") {
+          const className =
+            block.level === 1
+              ? "mt-4 first:mt-0 text-base font-semibold text-slate-950"
+              : "mt-4 first:mt-0 font-semibold text-slate-900";
+          const children = renderInline(block.text);
+          if (block.level === 1) {
+            return (
+              <h3 key={index} className={className}>
+                {children}
+              </h3>
+            );
+          }
+          if (block.level === 2) {
+            return (
+              <h4 key={index} className={className}>
+                {children}
+              </h4>
+            );
+          }
+          return (
+            <h5 key={index} className={className}>
+              {children}
+            </h5>
+          );
+        }
+
+        if (block.type === "ul") {
+          return (
+            <ul key={index} className="mt-2 list-disc space-y-1 pl-5">
+              {block.items.map((item, itemIndex) => (
+                <li key={itemIndex}>{renderInline(item)}</li>
+              ))}
+            </ul>
+          );
+        }
+
+        if (block.type === "ol") {
+          return (
+            <ol key={index} className="mt-2 list-decimal space-y-1 pl-5">
+              {block.items.map((item, itemIndex) => (
+                <li key={itemIndex}>{renderInline(item)}</li>
+              ))}
+            </ol>
+          );
+        }
+
+        if (block.type === "code") {
+          return (
+            <pre
+              key={index}
+              className="mt-3 overflow-x-auto rounded-md bg-slate-950 p-3 text-xs leading-6 text-slate-100"
+            >
+              <code>{block.text}</code>
+            </pre>
+          );
+        }
+
+        return (
+          <p key={index} className="mt-2 first:mt-0 whitespace-pre-wrap">
+            {renderInline(block.text)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+function parseMarkdown(value: string): MarkdownBlock[] {
+  const blocks: MarkdownBlock[] = [];
+  const lines = value.replace(/\r\n/g, "\n").split("\n");
+  let paragraph: string[] = [];
+  let list: { type: "ul" | "ol"; items: string[] } | null = null;
+  let code: string[] | null = null;
+
+  function flushParagraph() {
+    if (paragraph.length === 0) return;
+    blocks.push({ type: "paragraph", text: paragraph.join("\n") });
+    paragraph = [];
+  }
+
+  function flushList() {
+    if (!list) return;
+    blocks.push(list);
+    list = null;
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (code) {
+      if (trimmed.startsWith("```")) {
+        blocks.push({ type: "code", text: code.join("\n") });
+        code = null;
+      } else {
+        code.push(line);
+      }
+      continue;
+    }
+
+    if (trimmed.startsWith("```")) {
+      flushParagraph();
+      flushList();
+      code = [];
+      continue;
+    }
+
+    if (!trimmed) {
+      flushParagraph();
+      flushList();
+      continue;
+    }
+
+    const heading = /^(#{1,3})\s+(.+)$/.exec(trimmed);
+    if (heading) {
+      flushParagraph();
+      flushList();
+      blocks.push({
+        type: "heading",
+        level: heading[1].length as 1 | 2 | 3,
+        text: heading[2]
+      });
+      continue;
+    }
+
+    const unordered = /^[-*]\s+(.+)$/.exec(trimmed);
+    if (unordered) {
+      flushParagraph();
+      if (!list || list.type !== "ul") {
+        flushList();
+        list = { type: "ul", items: [] };
+      }
+      list.items.push(unordered[1]);
+      continue;
+    }
+
+    const ordered = /^\d+[.)]\s+(.+)$/.exec(trimmed);
+    if (ordered) {
+      flushParagraph();
+      if (!list || list.type !== "ol") {
+        flushList();
+        list = { type: "ol", items: [] };
+      }
+      list.items.push(ordered[1]);
+      continue;
+    }
+
+    flushList();
+    paragraph.push(line);
+  }
+
+  if (code) blocks.push({ type: "code", text: code.join("\n") });
+  flushParagraph();
+  flushList();
+
+  return blocks;
+}
+
+function renderInline(text: string): ReactNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).filter(Boolean);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return (
+        <code
+          key={index}
+          className="rounded bg-slate-100 px-1 py-0.5 text-xs text-slate-800"
+        >
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+
+    return <span key={index}>{part}</span>;
+  });
 }
