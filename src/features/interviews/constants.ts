@@ -39,3 +39,12 @@ export const INTERVIEW_FEELING_LABELS: Record<InterviewFeeling, string> = {
   OK: "一般",
   BAD: "较差"
 };
+
+export const AI_ANSWER_MODES = ["FAST", "DEEP"] as const;
+
+export type AiAnswerMode = (typeof AI_ANSWER_MODES)[number];
+
+export const AI_ANSWER_MODE_LABELS: Record<AiAnswerMode, string> = {
+  FAST: "快速解答",
+  DEEP: "深度思考"
+};

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  AI_ANSWER_MODES,
   INTERVIEW_DIFFICULTIES,
   INTERVIEW_FEELINGS,
   INTERVIEW_ROUNDS
@@ -35,3 +36,14 @@ export const interviewReviewSchema = z
     message: "请至少填写问题记录或备注总结。",
     path: ["questions"]
   });
+
+export const aiAnswerModeSchema = z.enum(AI_ANSWER_MODES);
+
+export const saveAiAnswerSchema = z.object({
+  answer: z.string().trim().min(1, "请填写 AI 参考答案。"),
+  mode: aiAnswerModeSchema
+});
+
+export const generateAiAnswerSchema = z.object({
+  mode: aiAnswerModeSchema
+});

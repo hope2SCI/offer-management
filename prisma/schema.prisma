@@ -14,6 +14,7 @@ model User {
   applications JobApplication[]
   resumes      Resume[]
   tasks        Task[]
+  aiSettings   UserAiSetting?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 }
@@ -94,19 +95,33 @@ model ApplicationActivity {
 }
 
 model InterviewReview {
-  id               String         @id @default(cuid())
-  jobApplicationId String
-  jobApplication   JobApplication @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
-  round            String
-  scheduledAt      DateTime
-  durationMinutes  Int
-  overallRating    Int
-  difficulty       String
-  feeling          String
-  questions        String?
-  notes            String?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  id                String         @id @default(cuid())
+  jobApplicationId  String
+  jobApplication    JobApplication @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+  round             String
+  scheduledAt       DateTime
+  durationMinutes   Int
+  overallRating     Int
+  difficulty        String
+  feeling           String
+  questions         String?
+  notes             String?
+  aiAnswer          String?
+  aiAnswerMode      String?
+  aiAnswerUpdatedAt DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
   @@index([jobApplicationId])
+}
+
+model UserAiSetting {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deepseekApiKeyCipher  String
+  deepseekApiKeyIv      String
+  deepseekApiKeyAuthTag String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
