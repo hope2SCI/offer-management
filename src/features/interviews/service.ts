@@ -2,8 +2,12 @@ import { prisma } from "@/lib/prisma";
 import { AppError } from "@/lib/errors";
 import { parseDateTimeLocal } from "@/lib/date";
 import { ACTIVITY_TYPES } from "@/features/applications/constants";
-import { INTERVIEW_ROUND_LABELS } from "./constants";
-import { interviewReviewSchema } from "./validators";
+import { INTERVIEW_ROUND_LABELS, type AiAnswerMode } from "./constants";
+import {
+  generateAiAnswerSchema,
+  interviewReviewSchema,
+  saveAiAnswerSchema
+} from "./validators";
 
 async function assertApplicationBelongsToUser(
   userId: string,
@@ -87,4 +91,43 @@ export async function updateInterviewReview(
 export async function deleteInterviewReview(userId: string, id: string) {
   await assertReviewBelongsToUser(userId, id);
   return prisma.interviewReview.delete({ where: { id } });
+}
+
+export async function getInterviewReviewForAi(userId: string, id: string) {
+  const review = await prisma.interviewReview.findFirst({
+    where: { id, jobApplication: { userId } },
+    select: {
+      id: true,
+      questions: true,
+      aiAnswer: true,
+      aiAnswerMode: true
+    }
+  });
+
+  if (!review) throw new AppError("Interview review not found.", 404);
+  return review;
+}
+
+export async function saveInterviewAiAnswer(
+  userId: string,
+  id: string,
+  input: unknown
+) {
+  const data = saveAiAnswerSchema.parse(input);
+  await assertReviewBelongsToUser(userId, id);
+
+  return prisma.interviewReview.update({
+    where: { id },
+    data: {
+      aiAnswer: data.answer,
+      aiAnswerMode: data.mode,
+      aiAnswerUpdatedAt: new Date()
+    }
+  });
+}
+
+export function parseGenerateAiAnswerInput(input: unknown): {
+  mode: AiAnswerMode;
+} {
+  return generateAiAnswerSchema.parse(input);
 }
