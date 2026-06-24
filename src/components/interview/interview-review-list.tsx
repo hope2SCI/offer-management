@@ -11,6 +11,7 @@ import {
   type InterviewRound
 } from "@/features/interviews/constants";
 import { interviewExcerpt } from "@/features/interviews/view";
+import { InterviewAiAnswerButton } from "./interview-ai-answer-button";
 import { InterviewReviewModalButton } from "./interview-review-modal-button";
 
 type ApplicationOption = Pick<JobApplication, "id" | "companyName" | "jobTitle">;
@@ -46,11 +47,9 @@ export function InterviewReviewList({
         const feeling = review.feeling as InterviewFeeling;
 
         return (
-          <InterviewReviewModalButton
+          <article
             key={review.id}
-            applications={applications}
-            review={review}
-            variant="card"
+            className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
@@ -63,14 +62,29 @@ export function InterviewReviewList({
                   {review.durationMinutes} 分钟
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Badge className="border-teal-200 bg-teal-50 text-teal-700">
-                  {INTERVIEW_ROUND_LABELS[round]}
-                </Badge>
-                <Badge className={INTERVIEW_DIFFICULTY_STYLES[difficulty]}>
-                  {INTERVIEW_DIFFICULTY_LABELS[difficulty]}
-                </Badge>
+              <div className="flex flex-wrap justify-end gap-2">
+                <InterviewAiAnswerButton review={review} />
+                <InterviewReviewModalButton
+                  applications={applications}
+                  review={review}
+                  variant="link"
+                >
+                  编辑
+                </InterviewReviewModalButton>
               </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Badge className="border-teal-200 bg-teal-50 text-teal-700">
+                {INTERVIEW_ROUND_LABELS[round]}
+              </Badge>
+              <Badge className={INTERVIEW_DIFFICULTY_STYLES[difficulty]}>
+                {INTERVIEW_DIFFICULTY_LABELS[difficulty]}
+              </Badge>
+              {review.aiAnswer ? (
+                <Badge className="border-sky-200 bg-sky-50 text-sky-700">
+                  已生成 AI 解答
+                </Badge>
+              ) : null}
             </div>
             <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
               <span>评分：{review.overallRating}/5</span>
@@ -79,7 +93,7 @@ export function InterviewReviewList({
             <p className="mt-3 text-sm leading-6 text-slate-600">
               {interviewExcerpt(review.questions)}
             </p>
-          </InterviewReviewModalButton>
+          </article>
         );
       })}
     </div>
