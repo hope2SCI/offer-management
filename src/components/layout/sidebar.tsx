@@ -8,6 +8,7 @@ import {
   CalendarCheck,
   FileText,
   MessageSquareText,
+  Settings,
   TrendingUp
 } from "lucide-react";
 import { clsx } from "clsx";
@@ -18,7 +19,8 @@ const navItems = [
   { href: "/resumes", label: "简历仓", icon: FileText },
   { href: "/tasks", label: "日程待办", icon: CalendarCheck },
   { href: "/insights", label: "数据洞察", icon: TrendingUp },
-  { href: "/interviews", label: "面试复盘", icon: MessageSquareText }
+  { href: "/interviews", label: "面试复盘", icon: MessageSquareText },
+  { href: "/settings", label: "设置", icon: Settings }
 ];
 
 export function Sidebar() {

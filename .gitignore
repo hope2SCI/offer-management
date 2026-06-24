@@ -11,3 +11,7 @@ uploads/resumes/*
 tsconfig.tsbuildinfo
 tests/
 AGENTS.md
+.agents/
+.codex/
+.superpowers/
+skills-lock.json

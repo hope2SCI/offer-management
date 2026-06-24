@@ -42,6 +42,8 @@ function inputFromForm(formData: FormData) {
 function revalidateInterviewViews() {
   revalidatePath("/interviews");
   revalidatePath("/applications");
+  revalidatePath("/dashboard");
+  revalidatePath("/insights");
 }
 
 export async function createInterviewReviewInModalAction(

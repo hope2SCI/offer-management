@@ -10,6 +10,7 @@ import {
   STATUS_LABELS,
   type ApplicationStatus
 } from "@/features/applications/constants";
+import { shouldConfirmStatusChange } from "@/features/applications/status-confirm";
 
 const BOARD_COLUMN_WIDTH_CLASS = "w-80";
 
@@ -119,6 +120,14 @@ export function ApplicationBoard({
     setOverStatus(null);
 
     if (!currentStatus || currentStatus === targetStatus) return;
+    if (
+      shouldConfirmStatusChange(currentStatus, targetStatus) &&
+      !window.confirm(
+        "回退状态会写入历史记录，数据洞察仍会按“曾经到达过”统计。确定继续吗？"
+      )
+    ) {
+      return;
+    }
 
     moveApplication(draggingId, targetStatus);
     persistStatus(draggingId, targetStatus);

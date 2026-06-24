@@ -43,6 +43,7 @@ export async function createApplicationInPlaceAction(
     await createApplication(user.id, applicationInputFromForm(formData));
     revalidatePath("/applications");
     revalidatePath("/dashboard");
+    revalidatePath("/insights");
     return { ok: true };
   } catch (error) {
     return { ok: false, message: getErrorMessage(error) };
@@ -57,6 +58,7 @@ export async function updateApplicationInModalAction(
   await updateApplication(user.id, id, applicationInputFromForm(formData));
   revalidatePath("/applications");
   revalidatePath("/dashboard");
+  revalidatePath("/insights");
   const redirectTo = formData.get("redirectTo");
   if (typeof redirectTo === "string" && redirectTo.startsWith("/applications")) {
     redirect(redirectTo);
@@ -76,11 +78,14 @@ export async function updateApplicationStatusAction(
   );
   revalidatePath("/applications");
   revalidatePath("/dashboard");
+  revalidatePath("/insights");
 }
 
 export async function deleteApplicationAction(id: string) {
   const user = await requireUser();
   await deleteApplication(user.id, id);
   revalidatePath("/applications");
+  revalidatePath("/dashboard");
+  revalidatePath("/insights");
   redirect("/applications");
 }

@@ -3,6 +3,7 @@ import { AppError } from "@/lib/errors";
 import { parseDateTimeLocal } from "@/lib/date";
 import { ACTIVITY_TYPES } from "@/features/applications/constants";
 import { INTERVIEW_ROUND_LABELS, type AiAnswerMode } from "./constants";
+import { nextInterviewApplicationStatus } from "./status-sync";
 import {
   generateAiAnswerSchema,
   interviewReviewSchema,
@@ -15,9 +16,10 @@ async function assertApplicationBelongsToUser(
 ) {
   const application = await prisma.jobApplication.findFirst({
     where: { id: jobApplicationId, userId },
-    select: { id: true }
+    select: { id: true, status: true }
   });
   if (!application) throw new AppError("Application not found.", 404);
+  return application;
 }
 
 async function assertReviewBelongsToUser(userId: string, id: string) {
@@ -32,9 +34,17 @@ export async function createInterviewReview(userId: string, input: unknown) {
   const data = interviewReviewSchema.parse(input);
   const scheduledAt = parseDateTimeLocal(data.scheduledAt);
   if (!scheduledAt) throw new AppError("Invalid interview start time.");
-  await assertApplicationBelongsToUser(userId, data.jobApplicationId);
+  const application = await assertApplicationBelongsToUser(
+    userId,
+    data.jobApplicationId
+  );
 
   return prisma.$transaction(async (tx) => {
+    const nextStatus = nextInterviewApplicationStatus(
+      application.status,
+      data.round
+    );
+
     const review = await tx.interviewReview.create({
       data: {
         jobApplicationId: data.jobApplicationId,
@@ -48,6 +58,27 @@ export async function createInterviewReview(userId: string, input: unknown) {
         notes: data.notes ?? null
       }
     });
+
+    if (nextStatus) {
+      await tx.jobApplication.update({
+        where: { id: data.jobApplicationId },
+        data: {
+          status: nextStatus,
+          endReason: null,
+          lastStatusChangedAt: new Date()
+        }
+      });
+
+      await tx.applicationActivity.create({
+        data: {
+          jobApplicationId: data.jobApplicationId,
+          type: ACTIVITY_TYPES.STATUS_CHANGED,
+          fromStatus: application.status,
+          toStatus: nextStatus,
+          content: "Updated application status from interview review"
+        }
+      });
+    }
 
     await tx.applicationActivity.create({
       data: {
@@ -70,21 +101,54 @@ export async function updateInterviewReview(
   const scheduledAt = parseDateTimeLocal(data.scheduledAt);
   if (!scheduledAt) throw new AppError("Invalid interview start time.");
   await assertReviewBelongsToUser(userId, id);
-  await assertApplicationBelongsToUser(userId, data.jobApplicationId);
+  const application = await assertApplicationBelongsToUser(
+    userId,
+    data.jobApplicationId
+  );
 
-  return prisma.interviewReview.update({
-    where: { id },
-    data: {
-      jobApplicationId: data.jobApplicationId,
-      round: data.round,
-      scheduledAt,
-      durationMinutes: data.durationMinutes,
-      overallRating: data.overallRating,
-      difficulty: data.difficulty,
-      feeling: data.feeling,
-      questions: data.questions ?? null,
-      notes: data.notes ?? null
+  return prisma.$transaction(async (tx) => {
+    const nextStatus = nextInterviewApplicationStatus(
+      application.status,
+      data.round
+    );
+
+    const review = await tx.interviewReview.update({
+      where: { id },
+      data: {
+        jobApplicationId: data.jobApplicationId,
+        round: data.round,
+        scheduledAt,
+        durationMinutes: data.durationMinutes,
+        overallRating: data.overallRating,
+        difficulty: data.difficulty,
+        feeling: data.feeling,
+        questions: data.questions ?? null,
+        notes: data.notes ?? null
+      }
+    });
+
+    if (nextStatus) {
+      await tx.jobApplication.update({
+        where: { id: data.jobApplicationId },
+        data: {
+          status: nextStatus,
+          endReason: null,
+          lastStatusChangedAt: new Date()
+        }
+      });
+
+      await tx.applicationActivity.create({
+        data: {
+          jobApplicationId: data.jobApplicationId,
+          type: ACTIVITY_TYPES.STATUS_CHANGED,
+          fromStatus: application.status,
+          toStatus: nextStatus,
+          content: "Updated application status from interview review"
+        }
+      });
     }
+
+    return review;
   });
 }
 
