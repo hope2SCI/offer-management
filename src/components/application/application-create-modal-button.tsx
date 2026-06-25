@@ -22,7 +22,7 @@ import {
 
 type ApplicationCreateModalButtonProps = {
   defaultStatus: ApplicationStatus;
-  resumes: Array<Pick<Resume, "id" | "name">>;
+  resumes: Array<Pick<Resume, "id" | "name" | "version">>;
   trigger: "primary" | "icon";
 };
 
@@ -77,7 +77,7 @@ function ApplicationCreateModal({
   onClose
 }: {
   defaultStatus: ApplicationStatus;
-  resumes: Array<Pick<Resume, "id" | "name">>;
+  resumes: Array<Pick<Resume, "id" | "name" | "version">>;
   onClose: () => void;
 }) {
   const initialState: CreateApplicationFormState = { ok: false };
@@ -249,7 +249,7 @@ function ApplicationCreateModal({
                 <option value="">暂不关联</option>
                 {resumes.map((resume) => (
                   <option key={resume.id} value={resume.id}>
-                    {resume.name}
+                    {resume.name} · {resume.version}
                   </option>
                 ))}
               </select>

@@ -69,7 +69,15 @@ export default async function DashboardPage() {
         </div>
 
         <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="font-semibold text-slate-950">最近更新</h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-semibold text-slate-950">最近更新</h2>
+            <Link
+              href="/applications"
+              className="shrink-0 text-sm text-teal-700"
+            >
+              查看全部
+            </Link>
+          </div>
           <div className="mt-4 space-y-3">
             {metrics.recentApplications.length === 0 ? (
               <p className="text-sm text-slate-500">暂无岗位记录</p>
@@ -81,15 +89,15 @@ export default async function DashboardPage() {
                   className="block rounded-md border border-slate-200 p-3 hover:bg-slate-50"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-slate-950">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-slate-950">
                         {application.companyName}
                       </p>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 truncate text-sm text-slate-500">
                         {application.jobTitle}
                       </p>
                     </div>
-                    <span className="text-xs text-slate-500">
+                    <span className="shrink-0 text-xs text-slate-500">
                       {
                         PRIORITY_LABELS[
                           application.priority as Priority

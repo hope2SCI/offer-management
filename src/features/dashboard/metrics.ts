@@ -44,7 +44,7 @@ export async function getDashboardMetrics(userId: string) {
       where: { userId },
       include: { resume: true },
       orderBy: { updatedAt: "desc" },
-      take: 6
+      take: 3
     }),
     getTaskBuckets(userId)
   ]);

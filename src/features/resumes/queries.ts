@@ -28,7 +28,7 @@ export async function getResume(userId: string, id: string) {
 export async function listResumeOptions(userId: string) {
   return prisma.resume.findMany({
     where: { userId },
-    select: { id: true, name: true },
+    select: { id: true, name: true, version: true },
     orderBy: { updatedAt: "desc" }
   });
 }

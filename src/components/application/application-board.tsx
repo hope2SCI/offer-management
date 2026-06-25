@@ -26,7 +26,7 @@ type ApplicationGroup = {
 
 type ApplicationBoardProps = {
   grouped: ApplicationGroup[];
-  resumes: Array<Pick<Resume, "id" | "name">>;
+  resumes: Array<Pick<Resume, "id" | "name" | "version">>;
   query?: string;
   priority?: string;
   status?: string;

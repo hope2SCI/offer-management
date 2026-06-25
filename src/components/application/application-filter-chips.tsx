@@ -12,6 +12,7 @@ type ApplicationFilterChipsProps = {
   status?: string;
   source?: string;
   city?: string;
+  view?: string;
   sources: string[];
   cities: string[];
 };
@@ -87,10 +88,12 @@ export function ApplicationFilterChips({
   status,
   source,
   city,
+  view,
   sources,
   cities
 }: ApplicationFilterChipsProps) {
   const baseParams = new URLSearchParams();
+  if (view) baseParams.set("view", view);
   if (q) baseParams.set("q", q);
   if (priority) baseParams.set("priority", priority);
   if (status) baseParams.set("status", status);

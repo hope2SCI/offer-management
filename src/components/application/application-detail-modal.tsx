@@ -41,7 +41,7 @@ type ApplicationDetailModalProps = {
     activities: ApplicationActivity[];
     interviewReviews: InterviewReview[];
   };
-  resumes: Array<Pick<Resume, "id" | "name">>;
+  resumes: Array<Pick<Resume, "id" | "name" | "version">>;
   closeHref: string;
 };
 
@@ -235,7 +235,7 @@ export function ApplicationDetailModal({
                   <option value="">暂不关联</option>
                   {resumes.map((resume) => (
                     <option key={resume.id} value={resume.id}>
-                      {resume.name}
+                      {resume.name} · {resume.version}
                     </option>
                   ))}
                 </select>
@@ -323,7 +323,7 @@ export function ApplicationDetailModal({
               {application.resume ? (
                 <div className="mt-3 text-sm text-slate-600">
                   <p className="font-medium text-slate-950">
-                    {application.resume.name}
+                    {application.resume.name} · {application.resume.version}
                   </p>
                   <Link
                     href={`/api/resumes/${application.resume.id}/file`}

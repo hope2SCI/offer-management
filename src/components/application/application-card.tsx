@@ -48,7 +48,12 @@ export function ApplicationCard({ application, href }: ApplicationCardProps) {
       ) : null}
 
       <div className="mt-4 space-y-2 text-xs text-slate-500">
-        <p className="truncate">简历：{application.resume?.name ?? "未关联"}</p>
+        <p className="truncate">
+          简历：
+          {application.resume
+            ? `${application.resume.name} · ${application.resume.version}`
+            : "未关联"}
+        </p>
         <div className="flex flex-wrap items-center gap-2">
           <span className="max-w-full truncate rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-600">
             {application.city ?? "未填写城市"}
