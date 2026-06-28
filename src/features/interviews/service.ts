@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { AppError } from "@/lib/errors";
 import { parseDateTimeLocal } from "@/lib/date";
 import { ACTIVITY_TYPES } from "@/features/applications/constants";
-import { INTERVIEW_ROUND_LABELS, type AiAnswerMode } from "./constants";
+import { INTERVIEW_ROUND_LABELS, type AiAnswerModel } from "./constants";
 import { nextInterviewApplicationStatus } from "./status-sync";
 import {
   generateAiAnswerSchema,
@@ -184,14 +184,14 @@ export async function saveInterviewAiAnswer(
     where: { id },
     data: {
       aiAnswer: data.answer,
-      aiAnswerMode: data.mode,
+      aiAnswerMode: data.model,
       aiAnswerUpdatedAt: new Date()
     }
   });
 }
 
 export function parseGenerateAiAnswerInput(input: unknown): {
-  mode: AiAnswerMode;
+  model: AiAnswerModel;
 } {
   return generateAiAnswerSchema.parse(input);
 }

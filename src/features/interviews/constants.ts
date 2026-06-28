@@ -1,6 +1,7 @@
 export const INTERVIEW_ROUNDS = [
   "FIRST_INTERVIEW",
   "SECOND_INTERVIEW",
+  "WRITTEN_TEST",
   "HR_INTERVIEW",
   "OTHER"
 ] as const;
@@ -10,6 +11,7 @@ export type InterviewRound = (typeof INTERVIEW_ROUNDS)[number];
 export const INTERVIEW_ROUND_LABELS: Record<InterviewRound, string> = {
   FIRST_INTERVIEW: "一面",
   SECOND_INTERVIEW: "二面",
+  WRITTEN_TEST: "笔试",
   HR_INTERVIEW: "HR 面",
   OTHER: "其他"
 };
@@ -40,11 +42,27 @@ export const INTERVIEW_FEELING_LABELS: Record<InterviewFeeling, string> = {
   BAD: "较差"
 };
 
-export const AI_ANSWER_MODES = ["FAST", "DEEP"] as const;
+export const AI_ANSWER_MODELS = [
+  "deepseek-v4-pro",
+  "deepseek-v4-flash"
+] as const;
 
-export type AiAnswerMode = (typeof AI_ANSWER_MODES)[number];
+export type AiAnswerModel = (typeof AI_ANSWER_MODELS)[number];
 
-export const AI_ANSWER_MODE_LABELS: Record<AiAnswerMode, string> = {
-  FAST: "快速解答",
-  DEEP: "深度思考"
+export const AI_ANSWER_MODEL_LABELS: Record<AiAnswerModel, string> = {
+  "deepseek-v4-pro": "deepseek-v4-pro",
+  "deepseek-v4-flash": "deepseek-v4-flash"
 };
+
+export function aiAnswerModelFromValue(
+  value: string | null | undefined
+): AiAnswerModel {
+  if (
+    value === "deepseek-v4-pro" ||
+    value === "deepseek-pro" ||
+    value === "DEEP"
+  ) {
+    return "deepseek-v4-pro";
+  }
+  return "deepseek-v4-flash";
+}

@@ -90,7 +90,7 @@ export async function saveInterviewAiAnswerAction(
     const user = await requireUser();
     await saveInterviewAiAnswer(user.id, id, {
       answer: formData.get("answer"),
-      mode: formData.get("mode")
+      model: formData.get("model")
     });
     revalidateInterviewViews();
     return { ok: true, message: "已保存 AI 参考答案。" };
@@ -106,8 +106,8 @@ export async function generateInterviewAiAnswerAction(
 ): Promise<InterviewAiAnswerState> {
   try {
     const user = await requireUser();
-    const { mode } = parseGenerateAiAnswerInput({
-      mode: formData.get("mode")
+    const { model } = parseGenerateAiAnswerInput({
+      model: formData.get("model")
     });
     const review = await getInterviewReviewForAi(user.id, id);
     const questions = review.questions?.trim();
@@ -118,11 +118,11 @@ export async function generateInterviewAiAnswerAction(
     const apiKey = await getDeepseekApiKey(user.id);
     const answer = await generateInterviewAiAnswer({
       apiKey,
-      mode,
+      model,
       questions
     });
 
-    await saveInterviewAiAnswer(user.id, id, { answer, mode });
+    await saveInterviewAiAnswer(user.id, id, { answer, model });
     revalidateInterviewViews();
     return { ok: true, answer, message: "已生成 AI 参考答案。" };
   } catch (error) {

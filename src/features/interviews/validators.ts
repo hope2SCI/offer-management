@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  AI_ANSWER_MODES,
+  AI_ANSWER_MODELS,
   INTERVIEW_DIFFICULTIES,
   INTERVIEW_FEELINGS,
   INTERVIEW_ROUNDS
@@ -37,13 +37,13 @@ export const interviewReviewSchema = z
     path: ["questions"]
   });
 
-export const aiAnswerModeSchema = z.enum(AI_ANSWER_MODES);
+export const aiAnswerModelSchema = z.enum(AI_ANSWER_MODELS);
 
 export const saveAiAnswerSchema = z.object({
   answer: z.string().trim().min(1, "请填写 AI 参考答案。"),
-  mode: aiAnswerModeSchema
+  model: aiAnswerModelSchema
 });
 
 export const generateAiAnswerSchema = z.object({
-  mode: aiAnswerModeSchema
+  model: aiAnswerModelSchema
 });

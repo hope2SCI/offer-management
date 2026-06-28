@@ -28,6 +28,7 @@ type ApplicationsPageProps = {
     city?: string;
     applicationId?: string;
     view?: string;
+    from?: string;
   }>;
 };
 
@@ -41,7 +42,7 @@ export default async function ApplicationsPage({
   searchParams
 }: ApplicationsPageProps) {
   const user = await requireUser();
-  const { q, priority, status, source, city, applicationId, view } =
+  const { q, priority, status, source, city, applicationId, view, from } =
     await searchParams;
   const isListView = view === "list";
   const [grouped, applications, selectedApplication, resumes, filterOptions] = await Promise.all([
@@ -61,9 +62,12 @@ export default async function ApplicationsPage({
   if (status) closeParams.set("status", status);
   if (source) closeParams.set("source", source);
   if (city) closeParams.set("city", city);
-  const closeHref = closeParams.size
-    ? `/applications?${closeParams.toString()}`
-    : "/applications";
+  const closeHref =
+    from === "dashboard"
+      ? "/dashboard"
+      : closeParams.size
+        ? `/applications?${closeParams.toString()}`
+        : "/applications";
 
   return (
     <AppShell

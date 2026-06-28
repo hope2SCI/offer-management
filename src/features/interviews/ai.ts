@@ -1,11 +1,7 @@
 import { AppError } from "@/lib/errors";
-import type { AiAnswerMode } from "./constants";
+import type { AiAnswerModel } from "./constants";
 
 const DEEPSEEK_BASE_URL = "https://api.deepseek.com";
-
-function modelForMode(mode: AiAnswerMode) {
-  return mode === "DEEP" ? "deepseek-v4-pro" : "deepseek-v4-flash";
-}
 
 export function buildInterviewAnswerPrompt(questions: string) {
   return [
@@ -25,14 +21,14 @@ export function buildInterviewAnswerPrompt(questions: string) {
 
 export async function generateInterviewAiAnswer({
   apiKey,
-  mode,
+  model,
   questions
 }: {
   apiKey: string;
-  mode: AiAnswerMode;
+  model: AiAnswerModel;
   questions: string;
 }) {
-  const thinkingEnabled = mode === "DEEP";
+  const thinkingEnabled = model === "deepseek-v4-pro";
   const response = await fetch(`${DEEPSEEK_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
@@ -40,7 +36,7 @@ export async function generateInterviewAiAnswer({
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: modelForMode(mode),
+      model,
       messages: [
         {
           role: "user",

@@ -85,7 +85,7 @@ export default async function DashboardPage() {
               metrics.recentApplications.map((application) => (
                 <Link
                   key={application.id}
-                  href={`/applications?applicationId=${application.id}`}
+                  href={`/applications?applicationId=${application.id}&from=dashboard`}
                   className="block rounded-md border border-slate-200 p-3 hover:bg-slate-50"
                 >
                   <div className="flex items-start justify-between gap-3">

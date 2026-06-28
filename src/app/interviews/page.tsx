@@ -4,8 +4,6 @@ import { InterviewReviewModalButton } from "@/components/interview/interview-rev
 import { requireUser } from "@/features/auth/session";
 import { listApplicationOptions } from "@/features/applications/queries";
 import {
-  INTERVIEW_DIFFICULTIES,
-  INTERVIEW_DIFFICULTY_LABELS,
   INTERVIEW_ROUNDS,
   INTERVIEW_ROUND_LABELS
 } from "@/features/interviews/constants";
@@ -15,7 +13,6 @@ type InterviewsPageProps = {
   searchParams: Promise<{
     q?: string;
     round?: string;
-    difficulty?: string;
   }>;
 };
 
@@ -23,10 +20,10 @@ export default async function InterviewsPage({
   searchParams
 }: InterviewsPageProps) {
   const user = await requireUser();
-  const { q, round, difficulty } = await searchParams;
+  const { q, round } = await searchParams;
   const [applications, reviews] = await Promise.all([
     listApplicationOptions(user.id),
-    listInterviewReviews(user.id, q, round, difficulty)
+    listInterviewReviews(user.id, q, round)
   ]);
 
   return (
@@ -55,20 +52,8 @@ export default async function InterviewsPage({
             </option>
           ))}
         </select>
-        <select
-          name="difficulty"
-          defaultValue={difficulty ?? ""}
-          className="h-10 rounded-md border border-slate-300 px-3 focus-ring"
-        >
-          <option value="">全部难度</option>
-          {INTERVIEW_DIFFICULTIES.map((item) => (
-            <option key={item} value={item}>
-              {INTERVIEW_DIFFICULTY_LABELS[item]}
-            </option>
-          ))}
-        </select>
         <button className="h-10 rounded-md border border-slate-300 px-4 text-sm font-medium hover:bg-slate-100">
-          筛选
+          搜索
         </button>
       </form>
 

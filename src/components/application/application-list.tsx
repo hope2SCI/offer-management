@@ -16,6 +16,16 @@ import { formatDateTime } from "@/lib/date";
 
 const PAGE_SIZE = 20;
 const PRIORITY_ORDER: Record<string, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+const STATUS_STYLES: Record<ApplicationStatus, string> = {
+  INTERESTED: "border-slate-200 bg-slate-50 text-slate-600",
+  APPLIED: "border-sky-200 bg-sky-50 text-sky-700",
+  WRITTEN_TEST: "border-violet-200 bg-violet-50 text-violet-700",
+  FIRST_INTERVIEW: "border-indigo-200 bg-indigo-50 text-indigo-700",
+  SECOND_INTERVIEW: "border-blue-200 bg-blue-50 text-blue-700",
+  HR_INTERVIEW: "border-cyan-200 bg-cyan-50 text-cyan-700",
+  OFFER: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  ENDED: "border-rose-200 bg-rose-50 text-rose-700"
+};
 const STATUS_ORDER = Object.fromEntries(
   APPLICATION_STATUSES.map((status, index) => [status, index])
 );
@@ -161,7 +171,7 @@ export function ApplicationList({
               <p className="hidden min-w-0 truncate text-sm text-slate-700 md:block">
                 {application.jobTitle}
               </p>
-              <Badge className="w-fit border-teal-200 bg-teal-50 text-teal-700">
+              <Badge className={`${STATUS_STYLES[status]} w-fit`}>
                 {STATUS_LABELS[status]}
               </Badge>
               <Badge className={`${PRIORITY_STYLES[priority]} w-fit`}>

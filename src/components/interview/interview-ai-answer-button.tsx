@@ -15,9 +15,10 @@ import {
   type InterviewAiAnswerState
 } from "@/features/interviews/actions";
 import {
-  AI_ANSWER_MODE_LABELS,
-  AI_ANSWER_MODES,
-  type AiAnswerMode
+  AI_ANSWER_MODEL_LABELS,
+  AI_ANSWER_MODELS,
+  aiAnswerModelFromValue,
+  type AiAnswerModel
 } from "@/features/interviews/constants";
 
 type Props = {
@@ -69,8 +70,9 @@ function InterviewAiAnswerModal({
   onClose: () => void;
   review: InterviewReview;
 }) {
-  const initialMode = (review.aiAnswerMode as AiAnswerMode | null) ?? "FAST";
-  const [mode, setMode] = useState<AiAnswerMode>(initialMode);
+  const [model, setModel] = useState<AiAnswerModel>(
+    aiAnswerModelFromValue(review.aiAnswerMode)
+  );
   const [answer, setAnswer] = useState(review.aiAnswer ?? "");
   const [isEditing, setIsEditing] = useState(!review.aiAnswer);
   const [generateState, generateAction] = useActionState<
@@ -129,43 +131,59 @@ function InterviewAiAnswerModal({
             </p>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {AI_ANSWER_MODES.map((item) => (
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
               <label
-                key={item}
-                className="flex h-9 items-center gap-2 rounded-md border border-slate-300 px-3 text-sm"
+                htmlFor="ai-answer-model"
+                className="block text-xs font-semibold text-slate-500"
               >
-                <input
-                  type="radio"
-                  name="visibleMode"
-                  checked={mode === item}
-                  onChange={() => setMode(item)}
-                />
-                {AI_ANSWER_MODE_LABELS[item]}
+                模型
               </label>
-            ))}
+              <div className="relative mt-1.5 w-full sm:w-56">
+                <select
+                  id="ai-answer-model"
+                  value={model}
+                  onChange={(event) =>
+                    setModel(event.target.value as AiAnswerModel)
+                  }
+                  className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-9 text-sm font-medium text-slate-900 shadow-sm transition hover:border-teal-300 focus-ring"
+                >
+                  {AI_ANSWER_MODELS.map((item) => (
+                    <option key={item} value={item}>
+                      {AI_ANSWER_MODEL_LABELS[item]}
+                    </option>
+                  ))}
+                </select>
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400"
+                >
+                  ▾
+                </span>
+              </div>
+            </div>
+
+            <form action={generateAction} className="sm:shrink-0">
+              <input type="hidden" name="model" value={model} />
+              <button
+                disabled={!hasQuestions}
+                className="h-10 w-full rounded-md bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                onClick={(event) => {
+                  if (
+                    answer &&
+                    !confirm("重新生成会覆盖当前 AI 参考答案，确定继续吗？")
+                  ) {
+                    event.preventDefault();
+                  }
+                }}
+              >
+                {answer ? "重新生成" : "生成答案"}
+              </button>
+            </form>
           </div>
 
-          <form action={generateAction} className="mt-4">
-            <input type="hidden" name="mode" value={mode} />
-            <button
-              disabled={!hasQuestions}
-              className="h-10 rounded-md bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
-              onClick={(event) => {
-                if (
-                  answer &&
-                  !confirm("重新生成会覆盖当前 AI 参考答案，确定继续吗？")
-                ) {
-                  event.preventDefault();
-                }
-              }}
-            >
-              {answer ? "重新生成" : "生成答案"}
-            </button>
-          </form>
-
           <form action={saveAction} className="mt-4 space-y-3">
-            <input type="hidden" name="mode" value={mode} />
+            <input type="hidden" name="model" value={model} />
             <input type="hidden" name="answer" value={answer} />
             <div>
               <div className="flex items-center justify-between gap-3">
